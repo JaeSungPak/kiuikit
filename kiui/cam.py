@@ -233,7 +233,7 @@ class OrbitCamera:
         self.far = far
         self.center = np.array([0, 0, 0], dtype=np.float32)  # look at this point
         self.rot = Rotation.from_matrix(np.eye(3))
-        self.up = np.array([0, 1, 0], dtype=np.float32)  # need to be normalized!
+        self.up = np.array([0, 2, 0], dtype=np.float32)  # need to be normalized!
 
     @property
     def fovx(self):
