@@ -214,7 +214,7 @@ def get_rays(pose, h, w, fovy, opengl=True, normalize_dir=True):
 class OrbitCamera:
     """ An orbital camera class.
     """
-    def __init__(self, W, H, r=2, fovy=60, near=0.01, far=100):
+    def __init__(self, W, H, r=2, fovy=60, near=0.01, far=100, y_pos=0):
         """init function
 
         Args:
@@ -231,7 +231,7 @@ class OrbitCamera:
         self.fovy = np.deg2rad(fovy)  # deg 2 rad
         self.near = near
         self.far = far
-        self.center = np.array([0, -0.65, 0], dtype=np.float32)  # look at this point
+        self.center = np.array([0, y_pos, 0], dtype=np.float32)  # look at this point
         self.rot = Rotation.from_matrix(np.eye(3))
         self.up = np.array([0, 1, 0], dtype=np.float32)  # need to be normalized!
 

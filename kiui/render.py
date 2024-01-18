@@ -21,7 +21,7 @@ class GUI:
         self.W = opt.W
         self.H = opt.H
         self.wogui = opt.wogui # disable gui and run in cmd
-        self.cam = OrbitCamera(opt.W, opt.H, r=opt.radius, fovy=opt.fovy)
+        self.cam = OrbitCamera(opt.W, opt.H, r=opt.radius, fovy=opt.fovy, y_pos=opt.pos)
         self.bg_color = torch.ones(3, dtype=torch.float32).cuda() # default white bg
         # self.bg_color = torch.zeros(3, dtype=torch.float32).cuda() # black bg
 
@@ -378,6 +378,7 @@ def main():
     parser.add_argument('--W', type=int, default=800, help="GUI width")
     parser.add_argument('--H', type=int, default=800, help="GUI height")
     parser.add_argument('--radius', type=float, default=3, help="default GUI camera radius from center")
+    parser.add_argument('--pos', type=float, default=0)
     parser.add_argument('--fovy', type=float, default=50, help="default GUI camera fovy")
     parser.add_argument("--wogui", action='store_true', help="disable all dpg GUI")
     parser.add_argument("--force_cuda_rast", action='store_true', help="force to use RasterizeCudaContext.")
