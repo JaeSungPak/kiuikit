@@ -55,8 +55,7 @@ class GUI:
 
             self.render_modes.append('pbr')
             
-        
-        self.glctx = dr.RasterizeCudaContext()
+        self.glctx = dr.RasterizeGLContext()
 
         if not self.wogui:
             dpg.create_context()
