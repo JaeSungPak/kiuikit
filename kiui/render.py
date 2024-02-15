@@ -103,7 +103,7 @@ class GUI:
                 texc, _ = dr.interpolate(self.mesh.vt.unsqueeze(0).contiguous(), rast, self.mesh.ft)
                 albedo = dr.texture(self.mesh.albedo.unsqueeze(0), texc, filter_mode='linear') # [1, H, W, 3]
 
-            albedo = torch.where(rast[..., 3:] > 0, albedo, torch.tensor(0).to(albedo.device)) # remove background
+            albedo = torch.where(rast[..., 3:] > 0, albedo, torch.tensor(0).float().to(albedo.device)) # remove background
             # albedo = dr.antialias(albedo, rast, v_clip, self.mesh.f).clamp(0, 1) # [1, H, W, 3]
 
             if self.mode == 'albedo':
