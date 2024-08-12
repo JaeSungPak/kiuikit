@@ -1,5 +1,6 @@
 # eval the clip-similarity for an input image and a geneated mesh
 import cv2
+import lpips
 import torch
 import numpy as np
 from torchvision import transforms as T
@@ -77,6 +78,9 @@ if __name__ == '__main__':
 
     # render from random views and evaluate similarity
     results = []
+    results_lpips = []
+
+    loss_fn_alex = lpips.LPIPS(net='alex')
 
     elevation = [opt.elevation,]
     azimuth = np.linspace(0, 360, opt.num_azimuth, dtype=np.int32, endpoint=False)
@@ -91,13 +95,20 @@ if __name__ == '__main__':
             
             # kiui.lo(ref_features, cur_features)
             similarity = (ref_features * cur_features).sum(dim=-1).mean().item()
+            lpips_value = loss_fn_alex(ref_img, image)
 
             results.append(similarity)
+            results_lpips.append(lpips_value[0][0][0][0])
     
     avg_similarity = np.mean(results)
+    avg_lpips = np.mean(results_lpips)
 
     f = open("record_clip.txt", 'a', encoding="utf8")
     f.write(f"{avg_similarity}\n")
+    f.close() 
+
+    f = open("lpips.txt", 'a', encoding="utf8")
+    f.write(f"{avg_lpips}\n")
     f.close() 
 
     print(avg_similarity)
