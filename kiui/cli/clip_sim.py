@@ -97,7 +97,7 @@ if __name__ == '__main__':
     avg_similarity = np.mean(results)
 
     f = open("record_clip.txt", 'a', encoding="utf8")
-    f.write(f"{opt.image}_clip: {avg_similarity} \n")
+    f.write(f"{avg_similarity}\n")
     f.close() 
 
     print(avg_similarity)
