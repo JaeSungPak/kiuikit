@@ -111,7 +111,7 @@ if __name__ == '__main__':
     avg_similarity = np.mean(results)
     avg_lpips = np.mean(results_lpips)
 
-    f = open("record_clip.txt", 'a', encoding="utf8")
+    f = open("clip_s.txt", 'a', encoding="utf8")
     f.write(f"{avg_similarity}\n")
     f.close() 
 
@@ -119,6 +119,7 @@ if __name__ == '__main__':
     f.write(f"{avg_lpips}\n")
     f.close() 
 
-    print(avg_similarity)
+    print(f"CLIP-S: {avg_similarity}")
+    print(f"LPIPS: {avg_lpips}")
 
             
