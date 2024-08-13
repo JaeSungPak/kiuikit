@@ -95,6 +95,7 @@ if __name__ == '__main__':
             
             # kiui.lo(ref_features, cur_features)
             similarity = (ref_features * cur_features).sum(dim=-1).mean().item()
+            import pdf; pdb.set_trace()
             lpips_value = loss_fn_alex(ref_img, image)
 
             results.append(similarity)
