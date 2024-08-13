@@ -104,7 +104,9 @@ if __name__ == '__main__':
             image_lpips = torch.from_numpy(image).permute(2, 0, 1)
 
             lpips_value = loss_fn_alex(ref_img_lpips, image_lpips)
-            results_lpips.append(lpips_value[0][0][0][0])
+            results_lpips.append(lpips_value[0][0][0][0].detach().numpy())
+
+            # import pdb; pdb.set_trace()
     
     avg_similarity = np.mean(results)
     avg_lpips = np.mean(results_lpips)
