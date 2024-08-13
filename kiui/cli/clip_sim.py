@@ -95,12 +95,15 @@ if __name__ == '__main__':
             
             # kiui.lo(ref_features, cur_features)
             similarity = (ref_features * cur_features).sum(dim=-1).mean().item()
-            
-            import pdb; pdb.set_trace()
-            image = cv2.resize(image, (512, 512))
-            lpips_value = loss_fn_alex(torch.from_numpy(ref_img).permute(2, 0, 1), torch.from_numpy(image).permute(2, 0, 1))
 
             results.append(similarity)
+            
+            # for lpips score
+            image = cv2.resize(image, (512, 512))
+            ref_img_lpips = torch.from_numpy(ref_img).permute(2, 0, 1)
+            image_lpips = torch.from_numpy(image).permute(2, 0, 1)
+
+            lpips_value = loss_fn_alex(ref_img_lpips, image_lpips)
             results_lpips.append(lpips_value[0][0][0][0])
     
     avg_similarity = np.mean(results)
