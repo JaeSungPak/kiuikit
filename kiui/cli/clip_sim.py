@@ -96,7 +96,7 @@ if __name__ == '__main__':
             # kiui.lo(ref_features, cur_features)
             similarity = (ref_features * cur_features).sum(dim=-1).mean().item()
             import pdb; pdb.set_trace()
-            lpips_value = loss_fn_alex(ref_img, image)
+            lpips_value = loss_fn_alex(torch.from_numpy(ref_img), torch.from_numpy(image))
 
             results.append(similarity)
             results_lpips.append(lpips_value[0][0][0][0])
