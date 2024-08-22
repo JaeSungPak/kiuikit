@@ -80,7 +80,7 @@ if __name__ == '__main__':
     results = []
     results_lpips = []
 
-    loss_fn_alex = lpips.LPIPS(net='alex')
+    loss_fn_alex = lpips.LPIPS(net='vgg')
 
     elevation = [opt.elevation,]
     azimuth = np.linspace(0, 360, opt.num_azimuth, dtype=np.int32, endpoint=False)
