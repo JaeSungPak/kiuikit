@@ -46,7 +46,8 @@ class GUI:
 
         # render_mode
         self.render_modes = ['depth', 'normal']
-        if self.mesh.albedo is not None and self.mesh.vc is not None:
+        if self.mesh.albedo is not None or self.mesh.vc is not None:
+            import pdb; pdb.set_trace()
             self.render_modes.extend(['albedo', 'lambertian'])
         
         if opt.mode in self.render_modes:
