@@ -78,9 +78,11 @@ if __name__ == '__main__':
 
     # render from random views and evaluate similarity
     results = []
-    results_lpips = []
+    results_lpips_vgg = []
+    results_lpips_alex = []
 
-    loss_fn_alex = lpips.LPIPS(net='vgg')
+    loss_fn_vgg = lpips.LPIPS(net='vgg')
+    loss_fn_alex = lpips.LPIPS(net='alex')
 
     elevation = [opt.elevation,]
     azimuth = np.linspace(0, 360, opt.num_azimuth, dtype=np.int32, endpoint=False)
@@ -103,23 +105,32 @@ if __name__ == '__main__':
             ref_img_lpips = torch.from_numpy(ref_img).permute(2, 0, 1)
             image_lpips = torch.from_numpy(image).permute(2, 0, 1)
 
-            lpips_value = loss_fn_alex(ref_img_lpips, image_lpips)
-            results_lpips.append(lpips_value[0][0][0][0].detach().numpy())
+            lpips_value_vgg = loss_fn_vgg(ref_img_lpips, image_lpips)
+            lpips_value_alex = loss_fn_alex(ref_img_lpips, image_lpips)
+
+            results_lpips_vgg.append(lpips_value_vgg[0][0][0][0].detach().numpy())
+            results_lpips_alex.append(lpips_value_alex[0][0][0][0].detach().numpy())
 
             # import pdb; pdb.set_trace()
     
     avg_similarity = np.mean(results)
-    avg_lpips = np.mean(results_lpips)
+    avg_lpips_vgg = np.mean(results_lpips_vgg)
+    avg_lpips_alex = np.mean(results_lpips_alex)
 
     f = open("clip_s.txt", 'a', encoding="utf8")
     f.write(f"{avg_similarity}\n")
     f.close() 
 
-    f = open("lpips.txt", 'a', encoding="utf8")
-    f.write(f"{avg_lpips}\n")
+    f = open("lpips_vgg.txt", 'a', encoding="utf8")
+    f.write(f"{avg_lpips_vgg}\n")
+    f.close() 
+
+    f = open("lpips_alex.txt", 'a', encoding="utf8")
+    f.write(f"{avg_lpips_alex}\n")
     f.close() 
 
     print(f"CLIP-S: {avg_similarity}")
-    print(f"LPIPS: {avg_lpips}")
+    print(f"LPIPS_VGG: {avg_lpips_vgg}")
+    print(f"LPIPS_ALEX: {avg_lpips_alex}")
 
             
