@@ -45,7 +45,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('image', type=str, help="path to front view image")
     parser.add_argument('mesh', type=str, help="path to mesh (obj, glb, ...)")
-    parser.add_argument('mode', type=str, default="clip", help="mode (clip, lpips)")
+    parser.add_argument('eval_mode', type=str, default="clip", help="mode (clip, lpips)")
     parser.add_argument('--pbr', action='store_true', help="enable PBR material")
     parser.add_argument('--envmap', type=str, default=None, help="hdr env map path for pbr")
     parser.add_argument('--front_dir', type=str, default='+z', help="mesh front-facing dir")
@@ -93,14 +93,14 @@ if __name__ == '__main__':
             gui.step()
             image = (gui.render_buffer * 255).astype(np.uint8)
         
-            if(opt.mode == "clip"):
+            if(opt.eval_mode == "clip"):
                 with torch.no_grad():
                     cur_features = clip.encode_image(image)
                 # kiui.lo(ref_features, cur_features)
                 similarity = (ref_features * cur_features).sum(dim=-1).mean().item()
                 results.append(similarity)
             
-            if(opt.mode == "lpips"):
+            if(opt.eval_mode == "lpips"):
                 # for lpips score
                 image = cv2.resize(image, (512, 512))
                 ref_img_lpips = torch.from_numpy(ref_img).permute(2, 0, 1)
@@ -109,14 +109,14 @@ if __name__ == '__main__':
                 results_lpips_vgg.append(lpips_value_vgg[0][0][0][0].detach().numpy())
 
    
-    if(opt.mode == "clip"):
+    if(opt.eval_mode == "clip"):
         avg_similarity = np.mean(results)
         f = open("clip_s.txt", 'a', encoding="utf8")
         f.write(f"{avg_similarity}\n")
         f.close()
         print(f"CLIP-S: {avg_similarity}")
         
-    if(opt.mode == "lpips"):
+    if(opt.eval_mode == "lpips"):
         avg_lpips_vgg = np.mean(results_lpips_vgg)
         f = open("lpips_vgg.txt", 'a', encoding="utf8")
         f.write(f"{avg_lpips_vgg}\n")
