@@ -92,23 +92,7 @@ if __name__ == '__main__':
             gui.need_update = True
             gui.step()
             image = (gui.render_buffer * 255).astype(np.uint8)
-            with torch.no_grad():
-                cur_features = clip.encode_image(image)
-            
-            # kiui.lo(ref_features, cur_features)
-            similarity = (ref_features * cur_features).sum(dim=-1).mean().item()
-
-            results.append(similarity)
-
-            # for lpips score
-            image = cv2.resize(image, (512, 512))
-            ref_img_lpips = torch.from_numpy(ref_img).permute(2, 0, 1)
-            image_lpips = torch.from_numpy(image).permute(2, 0, 1)
-            lpips_value_vgg = loss_fn_vgg(ref_img_lpips, image_lpips)
-            #lpips_value_alex = loss_fn_alex(ref_img_lpips, image_lpips)
-            results_lpips_vgg.append(lpips_value_vgg[0][0][0][0].detach().numpy())
-            #results_lpips_alex.append(lpips_value_alex[0][0][0][0].detach().numpy())
-            # import pdb; pdb.set_trace()
+        
             if(opt.mode == "clip"):
                 with torch.no_grad():
                     cur_features = clip.encode_image(image)
@@ -124,27 +108,14 @@ if __name__ == '__main__':
                 lpips_value_vgg = loss_fn_vgg(ref_img_lpips, image_lpips)
                 results_lpips_vgg.append(lpips_value_vgg[0][0][0][0].detach().numpy())
 
-    avg_similarity = np.mean(results)
-    avg_lpips_vgg = np.mean(results_lpips_vgg)
-    #avg_lpips_alex = np.mean(results_lpips_alex)
-    f = open("clip_s.txt", 'a', encoding="utf8")
-    f.write(f"{avg_similarity}\n")
-    f.close()
-    f = open("lpips_vgg.txt", 'a', encoding="utf8")
-    f.write(f"{avg_lpips_vgg}\n")
-    f.close()
-    #f = open("lpips_alex.txt", 'a', encoding="utf8")
-    #f.write(f"{avg_lpips_alex}\n")
-    #f.close()
-    print(f"CLIP-S: {avg_similarity}")
-    print(f"LPIPS_VGG: {avg_lpips_vgg}")
-    #print(f"LPIPS_ALEX: {avg_lpips_alex}")
+   
     if(opt.mode == "clip"):
         avg_similarity = np.mean(results)
         f = open("clip_s.txt", 'a', encoding="utf8")
         f.write(f"{avg_similarity}\n")
         f.close()
         print(f"CLIP-S: {avg_similarity}")
+        
     if(opt.mode == "lpips"):
         avg_lpips_vgg = np.mean(results_lpips_vgg)
         f = open("lpips_vgg.txt", 'a', encoding="utf8")
