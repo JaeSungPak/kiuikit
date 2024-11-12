@@ -1,5 +1,5 @@
-# eval the clip-similarity for an input image and a geneated mesh
 import cv2
+import lpips
 import torch
 import numpy as np
 from torchvision import transforms as T
@@ -15,7 +15,7 @@ class CLIP:
 
         self.clip_model = CLIPModel.from_pretrained(model_name).to(self.device)
         self.processor = CLIPProcessor.from_pretrained(model_name)
-    
+
     def encode_image(self, image):
         # image: PIL, np.ndarray uint8 [H, W, 3]
 
@@ -45,24 +45,26 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('image', type=str, help="path to front view image")
     parser.add_argument('mesh', type=str, help="path to mesh (obj, glb, ...)")
+    parser.add_argument('mode', type=str, default="clip", help="mode (clip, lpips)")
     parser.add_argument('--pbr', action='store_true', help="enable PBR material")
     parser.add_argument('--envmap', type=str, default=None, help="hdr env map path for pbr")
     parser.add_argument('--front_dir', type=str, default='+z', help="mesh front-facing dir")
     parser.add_argument('--mode', default='albedo', type=str, choices=['lambertian', 'albedo', 'normal', 'depth', 'pbr'], help="rendering mode")
     parser.add_argument('--W', type=int, default=800, help="GUI width")
     parser.add_argument('--H', type=int, default=800, help="GUI height")
+    parser.add_argument('--ssaa', type=float, default=1, help="super-sampling anti-aliasing ratio")
     parser.add_argument('--radius', type=float, default=3, help="default GUI camera radius from center")
     parser.add_argument('--fovy', type=float, default=50, help="default GUI camera fovy")
     parser.add_argument("--force_cuda_rast", action='store_true', help="force to use RasterizeCudaContext.")
     parser.add_argument('--elevation', type=int, default=0, help="rendering elevation")
     parser.add_argument('--num_azimuth', type=int, default=8, help="number of images to render from different azimuths")
-    
+
     opt = parser.parse_args()
     opt.wogui = True
 
     # clip = CLIP('cuda')
     clip = CLIP('cuda', model_name='laion/CLIP-ViT-bigG-14-laion2B-39B-b160k')
-    
+
     gui = GUI(opt)
 
     # load image and encode as ref features
@@ -76,6 +78,11 @@ if __name__ == '__main__':
 
     # render from random views and evaluate similarity
     results = []
+    results_lpips_vgg = []
+    # results_lpips_alex = []
+
+    loss_fn_vgg = lpips.LPIPS(net='vgg')
+    # loss_fn_alex = lpips.LPIPS(net='alex')
 
     elevation = [opt.elevation,]
     azimuth = np.linspace(0, 360, opt.num_azimuth, dtype=np.int32, endpoint=False)
@@ -92,8 +99,55 @@ if __name__ == '__main__':
             similarity = (ref_features * cur_features).sum(dim=-1).mean().item()
 
             results.append(similarity)
-    
-    avg_similarity = np.mean(results)
-    print(avg_similarity)
 
+            # for lpips score
+            image = cv2.resize(image, (512, 512))
+            ref_img_lpips = torch.from_numpy(ref_img).permute(2, 0, 1)
+            image_lpips = torch.from_numpy(image).permute(2, 0, 1)
+            lpips_value_vgg = loss_fn_vgg(ref_img_lpips, image_lpips)
+            #lpips_value_alex = loss_fn_alex(ref_img_lpips, image_lpips)
+            results_lpips_vgg.append(lpips_value_vgg[0][0][0][0].detach().numpy())
+            #results_lpips_alex.append(lpips_value_alex[0][0][0][0].detach().numpy())
+            # import pdb; pdb.set_trace()
+            if(opt.mode == "clip"):
+                with torch.no_grad():
+                    cur_features = clip.encode_image(image)
+                # kiui.lo(ref_features, cur_features)
+                similarity = (ref_features * cur_features).sum(dim=-1).mean().item()
+                results.append(similarity)
             
+            if(opt.mode == "lpips"):
+                # for lpips score
+                image = cv2.resize(image, (512, 512))
+                ref_img_lpips = torch.from_numpy(ref_img).permute(2, 0, 1)
+                image_lpips = torch.from_numpy(image).permute(2, 0, 1)
+                lpips_value_vgg = loss_fn_vgg(ref_img_lpips, image_lpips)
+                results_lpips_vgg.append(lpips_value_vgg[0][0][0][0].detach().numpy())
+
+    avg_similarity = np.mean(results)
+    avg_lpips_vgg = np.mean(results_lpips_vgg)
+    #avg_lpips_alex = np.mean(results_lpips_alex)
+    f = open("clip_s.txt", 'a', encoding="utf8")
+    f.write(f"{avg_similarity}\n")
+    f.close()
+    f = open("lpips_vgg.txt", 'a', encoding="utf8")
+    f.write(f"{avg_lpips_vgg}\n")
+    f.close()
+    #f = open("lpips_alex.txt", 'a', encoding="utf8")
+    #f.write(f"{avg_lpips_alex}\n")
+    #f.close()
+    print(f"CLIP-S: {avg_similarity}")
+    print(f"LPIPS_VGG: {avg_lpips_vgg}")
+    #print(f"LPIPS_ALEX: {avg_lpips_alex}")
+    if(opt.mode == "clip"):
+        avg_similarity = np.mean(results)
+        f = open("clip_s.txt", 'a', encoding="utf8")
+        f.write(f"{avg_similarity}\n")
+        f.close()
+        print(f"CLIP-S: {avg_similarity}")
+    if(opt.mode == "lpips"):
+        avg_lpips_vgg = np.mean(results_lpips_vgg)
+        f = open("lpips_vgg.txt", 'a', encoding="utf8")
+        f.write(f"{avg_lpips_vgg}\n")
+        f.close()
+        print(f"LPIPS_VGG: {avg_lpips_vgg}")
