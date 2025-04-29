@@ -89,6 +89,10 @@ if __name__ == '__main__':
             results.append(similarity)
     
     avg_similarity = np.mean(results)
+
+    with open("clip_sim.txt", "a") as f:
+        f.write(f"{avg_similarity}\n")
+
     print(avg_similarity)
 
             
